@@ -1,27 +1,31 @@
 package com.sensedia.apix2019.microservice.finder.verticles;
 
+import com.sensedia.apix2019.microservice.finder.commons.Constants;
+import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfiguration;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.RabbitMQClient;
-import io.vertx.rabbitmq.RabbitMQOptions;
 
 import java.util.Objects;
 
 public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
+    protected JsonObject config;
     protected RabbitMQClient client;
 
-    private static final String QUEUE_NAME = "apix2019-specification-queue";
+    private String queueName;
+
     @Override
     public void init(Vertx vertx, Context ctx){
         super.init(vertx, ctx);
-        RabbitMQOptions config = new RabbitMQOptions();
-        // full amqp uri
-        config.setUri("amqp://localhost:5672");
-        client = RabbitMQClient.create(vertx, config);
+
+        config = ctx.config().getJsonObject(Constants.RABBITMQ_CONFIG_KEY);
+        client = RabbitMQConfiguration.createRabbitMQInstance(vertx, config);
+
+        queueName = config.getString(Constants.RABBITMQ_QUEUE_NAME_ATTR);
     }
 
     @Override
@@ -29,7 +33,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
         client.start(result -> {
             if(result.succeeded()){
-                System.out.println("[*] Worker connected - Waiting for messages");
+                System.out.println("[*] Worker connected");
                 getMessage();
             } else {
                 System.out.println("[x] Error in worker connection");
@@ -42,7 +46,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
         vertx.setPeriodic(1000, new Handler<Long>() {
             @Override
             public void handle(Long aLong) {
-                client.basicGet(QUEUE_NAME, true, getResult -> {
+                client.basicGet(queueName, true, getResult -> {
                     if (getResult.succeeded()) {
                         JsonObject msg = getResult.result();
                         if(Objects.nonNull(msg)) {
@@ -51,7 +55,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
                     } else {
                         System.out.println("[x] Error during connection: " + getResult.cause());
                         getResult.cause().printStackTrace();
-                        System.out.println("[*] Trying to recreate queue ->" + QUEUE_NAME);
+                        System.out.println("[*] Trying to recreate queue ->" + queueName);
                         declareQueue();
                     }
                 });
@@ -61,12 +65,12 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
     }
 
     private void declareQueue(){
-        client.queueDeclare(QUEUE_NAME, true, false, true, queueResult -> {
+        client.queueDeclare(queueName, true, false, true, queueResult -> {
             if(queueResult.succeeded()){
-                System.out.println("[*] Queue " + QUEUE_NAME + " created!");
+                System.out.println("[*] Queue " + queueName + " created!");
                 System.out.println("[*] Waiting for messages...");
             } else {
-                System.err.println("[x] Error creating queue " + QUEUE_NAME);
+                System.err.println("[x] Error creating queue ->" + queueName);
                 queueResult.cause().printStackTrace();
             }
         });
