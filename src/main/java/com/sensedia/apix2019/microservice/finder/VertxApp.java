@@ -7,6 +7,7 @@ import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang.StringUtils;
 
 public class VertxApp {
 
@@ -23,9 +24,10 @@ public class VertxApp {
     }
 
     private static ConfigRetriever setAppConfiguration(Vertx vertx){
+
         ConfigStoreOptions fileStore = new ConfigStoreOptions()
                 .setType("file")
-                .setConfig(new JsonObject().put("path", "src/main/resources/application-conf.json"));
+                .setConfig(new JsonObject().put("path", setConfigurationFilePath()));
 
         ConfigRetrieverOptions options = new ConfigRetrieverOptions()
                 .addStore(fileStore);
@@ -33,4 +35,19 @@ public class VertxApp {
         ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
         return retriever;
     }
+
+    private static String setConfigurationFilePath(){
+        String finderConfigFile = System.getenv("FINDER_CONFIG_FILE");
+        if(StringUtils.isBlank(finderConfigFile)){
+            finderConfigFile = "src/main/resources/application-conf.json";
+            System.out.println("[*] Environment Variable FINDER_CONFIG_FILE not set!");
+            System.out.println("[*] Starting application with default configuration file -> " + finderConfigFile);
+        } else {
+            System.out.println("[*] Environment Variable FINDER_CONFIG_FILE value found!");
+            System.out.println("[*] Starting application using file -> " + finderConfigFile);
+        }
+
+        return finderConfigFile;
+    }
+
 }

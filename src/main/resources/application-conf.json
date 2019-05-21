@@ -1,6 +1,6 @@
 {
   "rabbit" : {
     "queueName" : "apix2019-specification-queue",
-    "connectionUrl" : "amqp://localhost:5672"
+    "connectionUrl" : "amqp://rabbit13:5672"
   }
 }
