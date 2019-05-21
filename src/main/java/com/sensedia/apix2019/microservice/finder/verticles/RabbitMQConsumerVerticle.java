@@ -2,6 +2,8 @@ package com.sensedia.apix2019.microservice.finder.verticles;
 
 import com.sensedia.apix2019.microservice.finder.commons.Constants;
 import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfiguration;
+import com.sensedia.apix2019.microservice.finder.dto.IncomeMessage;
+import com.sensedia.apix2019.microservice.finder.utils.MessageUtils;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -33,7 +35,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
         client.start(result -> {
             if(result.succeeded()){
-                System.out.println("[*] Worker connected");
+                System.out.println("[*] Worker connected - Waiting for messages");
                 getMessage();
             } else {
                 System.out.println("[x] Error in worker connection");
@@ -50,7 +52,10 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
                     if (getResult.succeeded()) {
                         JsonObject msg = getResult.result();
                         if(Objects.nonNull(msg)) {
-                            System.out.println("[*] Received message: " + msg.getString("body"));
+                            String msgFromRabbit = msg.getString("body");
+                            System.out.println("[*] Received message: " + msgFromRabbit);
+                            IncomeMessage incomeMessage = MessageUtils.mapToObject(msgFromRabbit);
+                            //Use IncomeMessage object in ES search
                         }
                     } else {
                         System.out.println("[x] Error during connection: " + getResult.cause());
@@ -75,4 +80,5 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
             }
         });
     }
+
 }
