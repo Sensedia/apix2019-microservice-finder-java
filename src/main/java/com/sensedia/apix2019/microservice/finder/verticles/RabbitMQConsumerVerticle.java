@@ -27,6 +27,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
     @Override
     public void init(Vertx vertx, Context ctx) {
+
         super.init(vertx, ctx);
 
         config = ctx.config().getJsonObject(Constants.RABBITMQ_CONFIG_KEY);
