@@ -19,6 +19,8 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQConsumerVerticle.class);
 
+    private static final String BODY = "body";
+
     private JsonObject config;
     private RabbitMQClient client;
     private String queueName;
@@ -55,21 +57,22 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
         vertx.setPeriodic(1000, new Handler<Long>() {
             @Override
             public void handle(Long aLong) {
+
                 client.basicGet(queueName, true, getResult -> {
+
                     if (getResult.succeeded()) {
                         JsonObject msg = getResult.result();
 
                         if (Objects.nonNull(msg)) {
-                            String msgFromRabbit = msg.getString("body");
+                            String msgPayload = msg.getString(BODY);
+                            logger.info("Received message: {}", msgPayload);
 
-                            logger.info("Received message: " + msgFromRabbit);
-
-                            eventBus.send(FinderEvent.ES_QUERY_EVENT.name(), msg.getJsonObject("body"));
+                            eventBus.send(FinderEvent.ES_QUERY_EVENT.name(), msgPayload);
                         }
 
                     } else {
-                        logger.error("Error during connection: " + getResult.cause());
-                        logger.error("Trying to recreate queue ->" + queueName);
+                        logger.error("Error during connection. Cause {}", getResult.cause());
+                        logger.error("Trying to recreate queue {}", queueName);
                         createQueue();
                     }
                 });
