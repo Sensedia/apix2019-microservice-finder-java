@@ -5,7 +5,6 @@ import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfigura
 import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -55,29 +54,26 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
         final EventBus eventBus = vertx.eventBus();
 
-        vertx.setPeriodic(1000, new Handler<Long>() {
-            @Override
-            public void handle(Long aLong) {
+        vertx.setPeriodic(1000, handler -> {
 
-                client.basicGet(queueName, true, getResult -> {
+            client.basicGet(queueName, true, getResult -> {
 
-                    if (getResult.succeeded()) {
-                        JsonObject msg = getResult.result();
+                if (getResult.succeeded()) {
+                    JsonObject msg = getResult.result();
 
-                        if (Objects.nonNull(msg)) {
-                            String msgPayload = msg.getString(BODY);
-                            logger.info("Received message: {}", msgPayload);
+                    if (Objects.nonNull(msg)) {
+                        String msgPayload = msg.getString(BODY);
+                        logger.info("Received message: {}", msgPayload);
 
-                            eventBus.send(FinderEvent.ES_QUERY_EVENT.name(), msgPayload);
-                        }
-
-                    } else {
-                        logger.error("Error during connection. Cause {}", getResult.cause());
-                        logger.error("Trying to recreate queue {}", queueName);
-                        createQueue();
+                        eventBus.send(FinderEvent.ES_QUERY_EVENT.name(), msgPayload);
                     }
-                });
-            }
+
+                } else {
+                    logger.error("Error during connection. Cause {}", getResult.cause());
+                    logger.error("Trying to recreate queue {}", queueName);
+                    createQueue();
+                }
+            });
         });
     }
 
