@@ -2,26 +2,29 @@ package com.sensedia.apix2019.microservice.finder.verticles;
 
 import com.sensedia.apix2019.microservice.finder.commons.Constants;
 import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfiguration;
-import com.sensedia.apix2019.microservice.finder.dto.IncomeMessage;
-import com.sensedia.apix2019.microservice.finder.utils.MessageUtils;
+import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rabbitmq.RabbitMQClient;
 
 import java.util.Objects;
 
 public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
-    protected JsonObject config;
-    protected RabbitMQClient client;
+    private static final Logger logger = LoggerFactory.getLogger(RabbitMQConsumerVerticle.class);
 
+    private JsonObject config;
+    private RabbitMQClient client;
     private String queueName;
 
     @Override
-    public void init(Vertx vertx, Context ctx){
+    public void init(Vertx vertx, Context ctx) {
         super.init(vertx, ctx);
 
         config = ctx.config().getJsonObject(Constants.RABBITMQ_CONFIG_KEY);
@@ -31,52 +34,58 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
     }
 
     @Override
-    public void start(){
+    public void start() {
 
         client.start(result -> {
-            if(result.succeeded()){
-                System.out.println("[*] Worker connected - Waiting for messages");
+            if (result.succeeded()) {
+                logger.info("Worker connected - Waiting for messages");
                 getMessage();
+
             } else {
-                System.out.println("[x] Error in worker connection");
+                logger.error("Error in worker connection");
             }
         });
 
     }
 
-    private void getMessage(){
+    private void getMessage() {
+
+        final EventBus eventBus = vertx.eventBus();
+
         vertx.setPeriodic(1000, new Handler<Long>() {
             @Override
             public void handle(Long aLong) {
                 client.basicGet(queueName, true, getResult -> {
                     if (getResult.succeeded()) {
                         JsonObject msg = getResult.result();
-                        if(Objects.nonNull(msg)) {
+
+                        if (Objects.nonNull(msg)) {
                             String msgFromRabbit = msg.getString("body");
-                            System.out.println("[*] Received message: " + msgFromRabbit);
-                            IncomeMessage incomeMessage = MessageUtils.mapToObject(msgFromRabbit);
-                            //Use IncomeMessage object in ES search
+
+                            logger.info("Received message: " + msgFromRabbit);
+
+                            eventBus.send(FinderEvent.ES_QUERY_EVENT.name(), msg.getJsonObject("body"));
                         }
+
                     } else {
-                        System.out.println("[x] Error during connection: " + getResult.cause());
-                        getResult.cause().printStackTrace();
-                        System.out.println("[*] Trying to recreate queue ->" + queueName);
-                        declareQueue();
+                        logger.error("Error during connection: " + getResult.cause());
+                        logger.error("Trying to recreate queue ->" + queueName);
+                        createQueue();
                     }
                 });
             }
         });
-
     }
 
-    private void declareQueue(){
+    private void createQueue() {
+
         client.queueDeclare(queueName, true, false, true, queueResult -> {
-            if(queueResult.succeeded()){
-                System.out.println("[*] Queue " + queueName + " created!");
-                System.out.println("[*] Waiting for messages...");
+            if (queueResult.succeeded()) {
+                logger.info("Queue {} created!", queueName);
+                logger.info("Waiting for messages...");
+
             } else {
-                System.err.println("[x] Error creating queue ->" + queueName);
-                queueResult.cause().printStackTrace();
+                logger.error("Error creating queue {}. Cause: {}", queueName, queueResult.cause());
             }
         });
     }

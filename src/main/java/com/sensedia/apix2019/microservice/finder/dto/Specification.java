@@ -1,6 +1,6 @@
 package com.sensedia.apix2019.microservice.finder.dto;
 
-import com.sensedia.apix2019.microservice.finder.dto.enums.TypeEnum;
+import com.sensedia.apix2019.microservice.finder.enumeration.Type;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Specification {
 
-    private TypeEnum type;
+    private Type type;
     private String color;
 
 }

@@ -1,6 +1,6 @@
 package com.sensedia.apix2019.microservice.finder.dto;
 
-import com.sensedia.apix2019.microservice.finder.dto.enums.GenderEnum;
+import com.sensedia.apix2019.microservice.finder.enumeration.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class IncomeMessage {
 
     private Long id;
     private String phone;
-    private GenderEnum gender;
+    private Gender gender;
     private List<Specification> specifications;
 
 }

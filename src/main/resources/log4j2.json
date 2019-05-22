@@ -1,0 +1,23 @@
+{
+  "configuration": {
+    "status": "error"
+  },
+  "appenders": {
+    "Console": {
+      "name": "ConsoleAppender",
+      "PatternLayout": {
+        "pattern": "%d{MM-dd-YYYY HH:mm:ss.SSS} %-5level %10c{1} - %msg%n"
+      }
+    }
+  },
+  "loggers": {
+    "logger": {
+      "name": "com.sensedia",
+      "level": "info",
+      "additivity": "false",
+      "AppenderRef": {
+        "ref": "ConsoleAppender"
+      }
+    }
+  }
+}
