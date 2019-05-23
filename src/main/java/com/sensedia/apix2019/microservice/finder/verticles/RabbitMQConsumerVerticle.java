@@ -4,9 +4,12 @@ import com.sensedia.apix2019.microservice.finder.commons.Constants;
 import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfiguration;
 import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -22,7 +25,9 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
     private JsonObject config;
     private RabbitMQClient client;
-    private String queueName;
+    private String queueSpecificationName;
+    private String queueRecomendationName;
+    private String queueNotificationName;
 
     @Override
     public void init(Vertx vertx, Context ctx) {
@@ -32,7 +37,9 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
         config = ctx.config().getJsonObject(Constants.RABBITMQ_CONFIG_KEY);
         client = RabbitMQConfiguration.createRabbitMQInstance(vertx, config);
 
-        queueName = config.getString(Constants.RABBITMQ_QUEUE_NAME_ATTR);
+        queueSpecificationName = config.getString(Constants.RABBITMQ_QUEUE_SPECIFICATION_NAME_ATTR);
+        queueRecomendationName = config.getString(Constants.RABBITMQ_QUEUE_RECOMENDATION_NAME_ATTR);
+        queueNotificationName = config.getString(Constants.RABBITMQ_QUEUE_NOTIFICATION_NAME_ATTR);
     }
 
     @Override
@@ -42,6 +49,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
             if (result.succeeded()) {
                 logger.info("Worker connected - Waiting for messages");
                 getMessage();
+                consumeElasticSearchQueryDone();
 
             } else {
                 logger.error("Error in worker connection");
@@ -56,7 +64,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
         vertx.setPeriodic(1000, handler -> {
 
-            client.basicGet(queueName, true, getResult -> {
+            client.basicGet(queueSpecificationName, true, getResult -> {
 
                 if (getResult.succeeded()) {
                     JsonObject msg = getResult.result();
@@ -70,22 +78,43 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
                 } else {
                     logger.error("Error during connection. Cause {}", getResult.cause());
-                    logger.error("Trying to recreate queue {}", queueName);
+                    logger.error("Trying to recreate queue {}", queueSpecificationName);
                     createQueue();
                 }
             });
         });
     }
 
-    private void createQueue() {
+    private void consumeElasticSearchQueryDone() {
+        vertx.eventBus()
+             .consumer(FinderEvent.ES_QUERY_DONE_EVENT.name(), this::publishKitResponse);
+    }
 
-        client.queueDeclare(queueName, true, false, true, queueResult -> {
+    private void publishKitResponse(Message<Object> message) {
+        JsonObject jsonMessage = new JsonObject().put("body", (String) message.body());
+
+        client.basicPublish("", queueRecomendationName, jsonMessage, this.publishHandler(queueRecomendationName));
+        client.basicPublish("", queueNotificationName, jsonMessage, this.publishHandler(queueNotificationName));
+    }
+
+    private Handler<AsyncResult<Void>> publishHandler(String queueName) {
+        return (AsyncResult<Void> pubResult) -> {
+            if (pubResult.succeeded()) {
+                logger.info("Message on '{}' queue published!", queueName);
+            } else {
+                logger.error("Error during message publish on queue '{}'. Cause {}", queueName, pubResult.cause());
+            }
+        };
+    }
+
+    private void createQueue() {
+        client.queueDeclare(queueSpecificationName, true, false, true, queueResult -> {
             if (queueResult.succeeded()) {
-                logger.info("Queue {} created!", queueName);
+                logger.info("Queue {} created!", queueSpecificationName);
                 logger.info("Waiting for messages...");
 
             } else {
-                logger.error("Error creating queue {}. Cause: {}", queueName, queueResult.cause());
+                logger.error("Error creating queue {}. Cause: {}", queueSpecificationName, queueResult.cause());
             }
         });
     }

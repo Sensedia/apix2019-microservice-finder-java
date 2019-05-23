@@ -7,7 +7,9 @@
     }
   ],
   "rabbit": {
-    "queueName": "apix-specification-queue",
+    "queueSpecificationName": "apix-specification-queue",
+    "queueRecomendationName": "apix-recomendation-queue",
+    "queueNotificationName": "apix-notification-queue",
     "connectionUrl": "amqp://localhost:5672"
   }
 }
