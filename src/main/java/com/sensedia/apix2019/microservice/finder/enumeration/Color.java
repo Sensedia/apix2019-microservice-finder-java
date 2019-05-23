@@ -1,6 +1,6 @@
 package com.sensedia.apix2019.microservice.finder.enumeration;
 
-public enum Gender {
+public enum Color {
 
-    M, F
+    WHITE, BLACK, BLUE
 }

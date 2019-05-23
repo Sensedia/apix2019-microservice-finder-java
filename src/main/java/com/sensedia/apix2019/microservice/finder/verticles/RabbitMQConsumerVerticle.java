@@ -65,7 +65,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
                         String msgPayload = msg.getString(BODY);
                         logger.info("Received message: {}", msgPayload);
 
-                        eventBus.send(FinderEvent.ES_QUERY_EVENT.name(), msgPayload);
+                        eventBus.send(FinderEvent.ES_SEARCH_EVENT.name(), msgPayload);
                     }
 
                 } else {
