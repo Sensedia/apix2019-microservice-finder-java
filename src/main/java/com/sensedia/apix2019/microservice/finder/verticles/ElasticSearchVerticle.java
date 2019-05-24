@@ -83,14 +83,15 @@ public class ElasticSearchVerticle extends AbstractVerticle {
     private MultiSearchRequest buildMultiSearchRequest(final KitRequest kitRequest) {
 
         final String gender = kitRequest.getGender().name();
+        final int searchLimit = kitRequest.getSpecifications().size();
         final MultiSearchRequest multiSearchRequest = new MultiSearchRequest();
 
-        kitRequest.getSpecifications().forEach(specification -> multiSearchRequest.add(buildSpecificationSearch(specification, gender)));
+        kitRequest.getSpecifications().forEach(specification -> multiSearchRequest.add(buildSpecificationSearch(specification, gender, searchLimit)));
 
         return multiSearchRequest;
     }
 
-    private SearchRequest buildSpecificationSearch(final Specification specification, final String gender) {
+    private SearchRequest buildSpecificationSearch(final Specification specification, final String gender, final int searchLimit) {
 
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery(COLOR, specification.getColor().name()))
@@ -101,7 +102,7 @@ public class ElasticSearchVerticle extends AbstractVerticle {
                 .query(queryBuilder)
                 .fetchSource(true)
                 .sort(new FieldSortBuilder(PRICE).order(ASC))
-                .size(3);
+                .size(searchLimit);
 
         return new SearchRequest(RECOMMENDATION).source(searchSourceBuilder);
     }
