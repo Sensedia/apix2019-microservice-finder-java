@@ -20,7 +20,6 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 
 import java.io.IOException;
 
@@ -31,6 +30,7 @@ import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.RECOMMENDATION;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.TYPE;
 import static com.sensedia.apix2019.microservice.finder.configuration.ElasticSearchConfiguration.createElasticSearchClient;
+import static org.elasticsearch.search.sort.SortOrder.ASC;
 
 
 public class ElasticSearchVerticle extends AbstractVerticle {
@@ -64,8 +64,8 @@ public class ElasticSearchVerticle extends AbstractVerticle {
 
                         @Override
                         public void onResponse(MultiSearchResponse result) {
-                            logger.info("Resultado 1 : {}", result.getResponses()[0].getResponse());
-                            logger.info("Resultado 2 : {}", result.getResponses()[1].getResponse());
+                            logger.info("Resultado 1 : {} \n \n", result.getResponses()[0].getResponse());
+                            logger.info("Resultado 2 : {} \n \n", result.getResponses()[1].getResponse());
                             logger.info("Resultado 3 : {}", result.getResponses()[2].getResponse());
                         }
 
@@ -93,14 +93,14 @@ public class ElasticSearchVerticle extends AbstractVerticle {
     private SearchRequest buildSpecificationSearch(final Specification specification, final String gender) {
 
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.fuzzyQuery(COLOR, specification.getColor().name()))
-                .must(QueryBuilders.fuzzyQuery(TYPE, specification.getType().name()))
-                .must(QueryBuilders.fuzzyQuery(GENDER, gender));
+                .must(QueryBuilders.termQuery(COLOR, specification.getColor().name()))
+                .must(QueryBuilders.termQuery(TYPE, specification.getType().name()))
+                .must(QueryBuilders.termQuery(GENDER, gender));
 
         final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .query(queryBuilder)
                 .fetchSource(true)
-                .sort(new FieldSortBuilder(PRICE).order(SortOrder.ASC))
+                .sort(new FieldSortBuilder(PRICE).order(ASC))
                 .size(3);
 
         return new SearchRequest(RECOMMENDATION).source(searchSourceBuilder);
