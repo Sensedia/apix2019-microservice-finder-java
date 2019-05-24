@@ -20,6 +20,6 @@ public class KitResponse {
 
     private Long id;
     private Gender gender;
-    private List<List<Item>> recomendations;
+    private List<List<Item>> recommendations;
 
 }

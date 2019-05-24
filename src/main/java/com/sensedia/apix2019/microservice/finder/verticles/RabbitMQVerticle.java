@@ -38,7 +38,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
         client = RabbitMQConfiguration.createRabbitMQClient(vertx, config);
 
         queueSpecificationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_SPECIFICATION_NAME_ATTR);
-        queueRecommendationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_RECOMENDATION_NAME_ATTR);
+        queueRecommendationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_RECOMMENDATION_NAME_ATTR);
         queueNotificationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_NOTIFICATION_NAME_ATTR);
     }
 

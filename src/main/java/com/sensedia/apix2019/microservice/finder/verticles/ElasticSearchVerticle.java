@@ -2,8 +2,10 @@ package com.sensedia.apix2019.microservice.finder.verticles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sensedia.apix2019.microservice.finder.dto.KitRequest;
+import com.sensedia.apix2019.microservice.finder.dto.KitResponse;
 import com.sensedia.apix2019.microservice.finder.dto.Specification;
 import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
+import com.sensedia.apix2019.microservice.finder.utils.ElasticSearchKitResponseBuilder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
@@ -24,6 +26,7 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import java.io.IOException;
 
 import static com.sensedia.apix2019.microservice.finder.commons.ConfigConstants.ELASTIC_SEARCH;
+import static com.sensedia.apix2019.microservice.finder.commons.ConfigConstants.RECOMMENDATIONS_NUMBER_LIMIT;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.COLOR;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.GENDER;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.PRICE;
@@ -64,9 +67,9 @@ public class ElasticSearchVerticle extends AbstractVerticle {
 
                         @Override
                         public void onResponse(MultiSearchResponse result) {
-                            logger.info("Resultado 1 : {} \n \n", result.getResponses()[0].getResponse());
-                            logger.info("Resultado 2 : {} \n \n", result.getResponses()[1].getResponse());
-                            logger.info("Resultado 3 : {}", result.getResponses()[2].getResponse());
+
+                            KitResponse kitResponse = ElasticSearchKitResponseBuilder.build(kitRequest.getId(), kitRequest.getGender(), result);
+                            logger.info("Number of responses returned: {}", result.getResponses().length);
                         }
 
                         @Override
@@ -83,15 +86,14 @@ public class ElasticSearchVerticle extends AbstractVerticle {
     private MultiSearchRequest buildMultiSearchRequest(final KitRequest kitRequest) {
 
         final String gender = kitRequest.getGender().name();
-        final int searchLimit = kitRequest.getSpecifications().size();
         final MultiSearchRequest multiSearchRequest = new MultiSearchRequest();
 
-        kitRequest.getSpecifications().forEach(specification -> multiSearchRequest.add(buildSpecificationSearch(specification, gender, searchLimit)));
+        kitRequest.getSpecifications().forEach(specification -> multiSearchRequest.add(buildSpecificationSearch(specification, gender)));
 
         return multiSearchRequest;
     }
 
-    private SearchRequest buildSpecificationSearch(final Specification specification, final String gender, final int searchLimit) {
+    private SearchRequest buildSpecificationSearch(final Specification specification, final String gender) {
 
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery(COLOR, specification.getColor().name()))
@@ -102,7 +104,7 @@ public class ElasticSearchVerticle extends AbstractVerticle {
                 .query(queryBuilder)
                 .fetchSource(true)
                 .sort(new FieldSortBuilder(PRICE).order(ASC))
-                .size(searchLimit);
+                .size(RECOMMENDATIONS_NUMBER_LIMIT);
 
         return new SearchRequest(RECOMMENDATION).source(searchSourceBuilder);
     }
