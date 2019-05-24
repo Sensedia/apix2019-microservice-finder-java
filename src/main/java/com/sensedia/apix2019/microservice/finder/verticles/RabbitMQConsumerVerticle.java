@@ -1,6 +1,6 @@
 package com.sensedia.apix2019.microservice.finder.verticles;
 
-import com.sensedia.apix2019.microservice.finder.commons.Constants;
+import com.sensedia.apix2019.microservice.finder.commons.RabbitConstants;
 import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfiguration;
 import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
 import io.vertx.core.AbstractVerticle;
@@ -29,10 +29,10 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
         super.init(vertx, ctx);
 
-        config = ctx.config().getJsonObject(Constants.RABBITMQ_CONFIG_KEY);
+        config = ctx.config().getJsonObject(RabbitConstants.RABBITMQ_CONFIG_KEY);
         client = RabbitMQConfiguration.createRabbitMQInstance(vertx, config);
 
-        queueName = config.getString(Constants.RABBITMQ_QUEUE_NAME_ATTR);
+        queueName = config.getString(RabbitConstants.RABBITMQ_QUEUE_NAME_ATTR);
     }
 
     @Override
@@ -40,14 +40,13 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
         client.start(result -> {
             if (result.succeeded()) {
-                logger.info("Worker connected - Waiting for messages");
+                logger.info("Rabbit verticle connected. Waiting for messages");
                 getMessage();
 
             } else {
                 logger.error("Error in worker connection");
             }
         });
-
     }
 
     private void getMessage() {
@@ -63,6 +62,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
                     if (Objects.nonNull(msg)) {
                         String msgPayload = msg.getString(BODY);
+
                         logger.info("Received message: {}", msgPayload);
 
                         eventBus.send(FinderEvent.ES_SEARCH_EVENT.name(), msgPayload);
@@ -79,7 +79,7 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
 
     private void createQueue() {
 
-        client.queueDeclare(queueName, true, false, true, queueResult -> {
+        client.queueDeclare(queueName, false, false, false, queueResult -> {
             if (queueResult.succeeded()) {
                 logger.info("Queue {} created!", queueName);
                 logger.info("Waiting for messages...");
@@ -89,5 +89,4 @@ public class RabbitMQConsumerVerticle extends AbstractVerticle {
             }
         });
     }
-
 }

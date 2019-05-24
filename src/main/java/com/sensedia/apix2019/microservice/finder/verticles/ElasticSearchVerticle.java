@@ -1,70 +1,108 @@
 package com.sensedia.apix2019.microservice.finder.verticles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hubrick.vertx.elasticsearch.ElasticSearchService;
-import com.hubrick.vertx.elasticsearch.model.SearchOptions;
-import com.hubrick.vertx.elasticsearch.model.SortOrder;
 import com.sensedia.apix2019.microservice.finder.dto.KitRequest;
+import com.sensedia.apix2019.microservice.finder.dto.Specification;
 import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.search.MultiSearchRequest;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.io.IOException;
+
+import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.COLOR;
+import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.GENDER;
+import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.PRICE;
+import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.RECOMMENDATION;
+import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.TYPE;
 
 public class ElasticSearchVerticle extends AbstractVerticle {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchVerticle.class);
 
-    private static final String EVENT_BUS_ADDRESS = "es-eventbus-address";
-
-    private ElasticSearchService elasticSearchService;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private RestHighLevelClient client;
+
     @Override
-    public void init(Vertx vertx, Context ctx) {
+    public void init(final Vertx vertx, final Context ctx) {
+
         super.init(vertx, ctx);
+
+        client = new RestHighLevelClient(RestClient.builder(new HttpHost("172.20.0.3", 9200, "http")));
     }
 
     @Override
     public void start() {
 
-        final EventBus eventBus = vertx.eventBus();
-        eventBus.localConsumer(EVENT_BUS_ADDRESS).handler(result -> result.reply(result.body()));
-        eventBus.consumer(FinderEvent.ES_SEARCH_EVENT.name(), this::searchHandler);
-
-        elasticSearchService = ElasticSearchService.createEventBusProxy(vertx, EVENT_BUS_ADDRESS);
+        vertx.eventBus().consumer(FinderEvent.ES_SEARCH_EVENT.name(), this::search);
     }
 
-    private void searchHandler(Message<Object> message) {
+    private void search(final Message<Object> message) {
 
         try {
-            String msgPayload = (String) message.body();
-            KitRequest kit = objectMapper.readValue(msgPayload, KitRequest.class);
+            KitRequest kitRequest = objectMapper.readValue((String) message.body(), KitRequest.class);
 
-            final SearchOptions searchOptions = new SearchOptions()
-                    .setQuery(new JsonObject("{\"match_all\": {}}"))
-                    .setFetchSource(true)
-                    .addFieldSort("price", SortOrder.DESC);
+            client.msearchAsync(buildMultiSearchRequest(kitRequest), RequestOptions.DEFAULT,
+                    new ActionListener<MultiSearchResponse>() {
 
+                        @Override
+                        public void onResponse(MultiSearchResponse result) {
+                            logger.info("Resultado 1 : {}", result.getResponses()[0].getResponse());
+                            logger.info("Resultado 2 : {}", result.getResponses()[1].getResponse());
+                            logger.info("Resultado 3 : {}", result.getResponses()[2].getResponse());
+                        }
 
-//            elasticSearchService.get("twitter", "tweet", "123", getOptions, getResponse -> {
-//
-//                if (getResponse.succeeded()) {
-//                    logger.info("ES result " + getResponse.result().toJson());
-//                } else {
-//                    logger.error("Ble {}", getResponse.cause());
-//                }
-//            });
+                        @Override
+                        public void onFailure(Exception e) {
+                            logger.error("Elastic search call has failed.", e);
+                        }
+                    });
 
         } catch (IOException e) {
-            logger.error("Message Conversion failed. Payload {}", message, e);
+            logger.error("Message Conversion failed. Payload {}.", message, e);
         }
+    }
+
+    private MultiSearchRequest buildMultiSearchRequest(final KitRequest kitRequest) {
+
+        final String gender = kitRequest.getGender().name();
+        final MultiSearchRequest multiSearchRequest = new MultiSearchRequest();
+
+        kitRequest.getSpecifications().forEach(specification -> multiSearchRequest.add(buildSpecificationSearch(specification, gender)));
+
+        return multiSearchRequest;
+    }
+
+    private SearchRequest buildSpecificationSearch(final Specification specification, final String gender) {
+
+        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.fuzzyQuery(COLOR, specification.getColor().name()))
+                .must(QueryBuilders.fuzzyQuery(TYPE, specification.getType().name()))
+                .must(QueryBuilders.fuzzyQuery(GENDER, gender));
+
+        final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                .query(queryBuilder)
+                .fetchSource(true)
+                .sort(new FieldSortBuilder(PRICE).order(SortOrder.ASC))
+                .size(3);
+
+        return new SearchRequest(RECOMMENDATION).source(searchSourceBuilder);
     }
 }
