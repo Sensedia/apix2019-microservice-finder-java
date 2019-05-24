@@ -1,7 +1,7 @@
 package com.sensedia.apix2019.microservice.finder;
 
 import com.sensedia.apix2019.microservice.finder.verticles.ElasticSearchVerticle;
-import com.sensedia.apix2019.microservice.finder.verticles.RabbitMQConsumerVerticle;
+import com.sensedia.apix2019.microservice.finder.verticles.RabbitMQVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -25,7 +25,7 @@ public class VertxApp {
 
         setAppConfiguration(vertx).getConfig(ar -> {
             if (ar.succeeded()) {
-                vertx.deployVerticle(new RabbitMQConsumerVerticle(), new DeploymentOptions().setConfig(ar.result()));
+                vertx.deployVerticle(new RabbitMQVerticle(), new DeploymentOptions().setConfig(ar.result()));
                 vertx.deployVerticle(new ElasticSearchVerticle(), new DeploymentOptions().setConfig(ar.result()));
             } else {
                 logger.error("Error retrieving config file -> ", ar.cause().getMessage());

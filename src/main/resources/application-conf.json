@@ -1,16 +1,13 @@
 {
-  "elasticsearch": {
-    "address": "http://172.20.0.3",
-    "cluster_name": "docker-cluster",
-    "transportAddresses": [
-      {
-        "hostname": "host1",
-        "port": 9300
-      }
-    ]
+  "elastic_search": {
+    "hostname": "172.20.0.3",
+    "scheme": "http",
+    "port": 9200
   },
   "rabbit": {
-    "queueName": "apix-specification-queue",
+    "queueSpecificationName": "apix-specification-queue",
+    "queueRecommendationName": "apix-recommendation-queue",
+    "queueNotificationName": "apix-notification-queue",
     "connectionUrl": "amqp://172.20.0.2"
   }
 }

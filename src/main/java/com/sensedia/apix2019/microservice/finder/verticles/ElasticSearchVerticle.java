@@ -10,13 +10,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.http.HttpHost;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.MultiSearchRequest;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -26,11 +24,14 @@ import org.elasticsearch.search.sort.SortOrder;
 
 import java.io.IOException;
 
+import static com.sensedia.apix2019.microservice.finder.commons.ConfigConstants.ELASTIC_SEARCH;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.COLOR;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.GENDER;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.PRICE;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.RECOMMENDATION;
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.TYPE;
+import static com.sensedia.apix2019.microservice.finder.configuration.ElasticSearchConfiguration.createElasticSearchClient;
+
 
 public class ElasticSearchVerticle extends AbstractVerticle {
 
@@ -44,8 +45,7 @@ public class ElasticSearchVerticle extends AbstractVerticle {
     public void init(final Vertx vertx, final Context ctx) {
 
         super.init(vertx, ctx);
-
-        client = new RestHighLevelClient(RestClient.builder(new HttpHost("172.20.0.3", 9200, "http")));
+        client = createElasticSearchClient(config().getJsonObject(ELASTIC_SEARCH));
     }
 
     @Override
