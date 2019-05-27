@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
-public class ElasticSearchKitResponseBuilder {
+public final class ElasticSearchKitResponseBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchKitResponseBuilder.class);
     private final static ObjectMapper objectMapper = new ObjectMapper();

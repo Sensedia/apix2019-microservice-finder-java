@@ -17,7 +17,7 @@ import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.
 import static com.sensedia.apix2019.microservice.finder.commons.SearchConstants.TYPE;
 import static org.elasticsearch.search.sort.SortOrder.ASC;
 
-public class ElasticSearchKitRequestBuilder {
+public final class ElasticSearchKitRequestBuilder {
 
     private ElasticSearchKitRequestBuilder() {
     }
