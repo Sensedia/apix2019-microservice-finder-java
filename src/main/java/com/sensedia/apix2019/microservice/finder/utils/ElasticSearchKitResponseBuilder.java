@@ -1,6 +1,7 @@
 package com.sensedia.apix2019.microservice.finder.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sensedia.apix2019.microservice.finder.builder.Builder;
 import com.sensedia.apix2019.microservice.finder.dto.Item;
 import com.sensedia.apix2019.microservice.finder.dto.KitResponse;
 import com.sensedia.apix2019.microservice.finder.enumeration.Gender;
@@ -82,10 +83,10 @@ public class ElasticSearchKitResponseBuilder {
         final List<List<Item>> recommendations = kitsRange.mapToObj((index) -> getIndexItemsFromTypes(index, itemsByType))
                 .collect(toList());
 
-        return KitResponse.builder()
-                .id(id)
-                .gender(gender)
-                .recommendations(recommendations)
+        return Builder.of(KitResponse::new)
+                .with(KitResponse::setId, id)
+                .with(KitResponse::setGender, gender)
+                .with(KitResponse::setRecommendations, recommendations)
                 .build();
     }
 
