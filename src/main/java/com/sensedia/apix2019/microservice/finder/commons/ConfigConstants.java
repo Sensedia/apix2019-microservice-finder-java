@@ -9,7 +9,7 @@ public final class ConfigConstants {
     public static final String RABBITMQ_CONFIG_KEY = "rabbit";
     public static final String RABBITMQ_CONN_URL_ATTR = "connectionUrl";
     public static final String RABBITMQ_QUEUE_SPECIFICATION_NAME_ATTR = "queueSpecificationName";
-    public static final String RABBITMQ_QUEUE_RECOMMENDATION_NAME_ATTR = "queueRecomendationName";
+    public static final String RABBITMQ_QUEUE_RECOMMENDATION_NAME_ATTR = "queueRecommendationName";
     public static final String RABBITMQ_QUEUE_NOTIFICATION_NAME_ATTR = "queueNotificationName";
 
     // Elastic search configurations

@@ -1,4 +1,4 @@
-package com.sensedia.apix2019.microservice.finder.verticles;
+package com.sensedia.apix2019.microservice.finder.verticle;
 
 import com.sensedia.apix2019.microservice.finder.commons.ConfigConstants;
 import com.sensedia.apix2019.microservice.finder.configuration.RabbitMQConfiguration;
@@ -22,6 +22,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQVerticle.class);
 
     private static final String BODY = "body";
+    private static final String PHONE = "phone";
 
     private JsonObject config;
     private RabbitMQClient client;
@@ -90,11 +91,12 @@ public class RabbitMQVerticle extends AbstractVerticle {
                 .consumer(FinderEvent.ES_QUERY_DONE_EVENT.name(), this::publishKitResponse);
     }
 
-    private void publishKitResponse(Message<Object> message) {
-        JsonObject jsonMessage = new JsonObject().put("body", (String) message.body());
+    private void publishKitResponse(Message<String> message) {
+        JsonObject notificationPayload = new JsonObject().put("body", message.headers().get(PHONE));
+        JsonObject recommendationsPayload = new JsonObject().put("body", message.body());
 
-        client.basicPublish("", queueRecommendationName, jsonMessage, this.publishHandler(queueRecommendationName));
-        client.basicPublish("", queueNotificationName, jsonMessage, this.publishHandler(queueNotificationName));
+        client.basicPublish("", queueNotificationName, notificationPayload, this.publishHandler(queueNotificationName));
+        client.basicPublish("", queueRecommendationName, recommendationsPayload, this.publishHandler(queueRecommendationName));
     }
 
     private Handler<AsyncResult<Void>> publishHandler(String queueName) {

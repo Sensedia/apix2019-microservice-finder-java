@@ -1,6 +1,6 @@
 {
   "elastic_search": {
-    "hostname": "172.20.0.3",
+    "hostname": "172.20.0.4",
     "scheme": "http",
     "port": 9200
   },

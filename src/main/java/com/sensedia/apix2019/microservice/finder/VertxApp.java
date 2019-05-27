@@ -1,7 +1,7 @@
 package com.sensedia.apix2019.microservice.finder;
 
-import com.sensedia.apix2019.microservice.finder.verticles.ElasticSearchVerticle;
-import com.sensedia.apix2019.microservice.finder.verticles.RabbitMQVerticle;
+import com.sensedia.apix2019.microservice.finder.verticle.ElasticSearchVerticle;
+import com.sensedia.apix2019.microservice.finder.verticle.RabbitMQVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
