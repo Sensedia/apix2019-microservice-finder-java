@@ -1,6 +1,6 @@
 {
   "elastic_search": {
-    "hostname": "172.20.0.4",
+    "hostname": "elasticsearch",
     "scheme": "http",
     "port": 9200
   },
@@ -8,6 +8,6 @@
     "queueSpecificationName": "apix-specification-queue",
     "queueRecommendationName": "apix-recommendation-queue",
     "queueNotificationName": "apix-notification-queue",
-    "connectionUrl": "amqp://172.20.0.2"
+    "connectionUrl": "amqp://rabbitmq"
   }
 }

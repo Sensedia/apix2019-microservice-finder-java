@@ -1,9 +1,8 @@
-version: '2'
+version: '3.6'
 services:
   apix2019-microservice-finder-java:
     image: sensedia/apix2019-microservice-finder-java
     container_name: finder
-    mem_limit: 128M
     ports:
       - "5050:8080"
     environment:
@@ -13,4 +12,4 @@ services:
 networks:
   apix2019:
     external:
-      name: apix2019
+      name: apix2019-infra_apix2019

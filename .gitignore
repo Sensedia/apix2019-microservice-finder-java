@@ -2,3 +2,4 @@
 /.vertx
 *.iml
 /target/
+/logs/
