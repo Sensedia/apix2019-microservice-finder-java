@@ -7,7 +7,8 @@ import com.sensedia.apix2019.microservice.finder.enumeration.Gender;
 import com.sensedia.apix2019.microservice.finder.enumeration.Type;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.search.MultiSearchResponse;
 
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class ElasticSearchKitResponseBuilder {
         }
 
         if (!items.isEmpty()) {
-            return Optional.of(new Pair<>(items.get(1).getType(), items));
+            return Optional.of(new ImmutablePair<>(items.get(1).getType(), items));
         }
 
         return Optional.empty();
