@@ -10,7 +10,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class VertxApp {
 
@@ -49,7 +49,7 @@ public class VertxApp {
 
         String finderConfigFile = System.getenv(FINDER_CONFIG_FILE);
 
-        if (StringUtils.isBlank(finderConfigFile)) {
+        if (isBlank(finderConfigFile)) {
             logger.warn("Environment Variable FINDER_CONFIG_FILE not set!");
             logger.warn("Starting application with default configuration file -> {}", DEFAULT_CONFIG_FILE);
             return DEFAULT_CONFIG_FILE;
