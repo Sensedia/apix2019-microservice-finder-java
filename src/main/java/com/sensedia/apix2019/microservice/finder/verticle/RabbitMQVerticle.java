@@ -80,7 +80,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
                 } else {
                     logger.error("Error during connection. Cause {}", getResult.cause().getCause().getMessage());
                     logger.error("Trying to recreate queue {}", queueSpecificationName);
-                    createQueue();
                 }
             });
         });
@@ -107,17 +106,5 @@ public class RabbitMQVerticle extends AbstractVerticle {
                 logger.error("Error during message publish on queue '{}'. Cause {}", queueName, pubResult.cause());
             }
         };
-    }
-
-    private void createQueue() {
-        client.queueDeclare(queueSpecificationName, false, false, false, queueResult -> {
-            if (queueResult.succeeded()) {
-                logger.info("Queue {} created!", queueSpecificationName);
-                logger.info("Waiting for messages...");
-
-            } else {
-                logger.error("Error creating queue {}. Cause: {}", queueSpecificationName, queueResult.cause());
-            }
-        });
     }
 }
