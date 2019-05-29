@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sensedia.apix2019.microservice.finder.dto.KitRequest;
 import com.sensedia.apix2019.microservice.finder.dto.KitResponse;
 import com.sensedia.apix2019.microservice.finder.enumeration.FinderEvent;
-import com.sensedia.apix2019.microservice.finder.enumeration.Gender;
 import com.sensedia.apix2019.microservice.finder.utils.ElasticSearchKitRequestBuilder;
 import com.sensedia.apix2019.microservice.finder.utils.ElasticSearchKitResponseBuilder;
 import io.vertx.core.AbstractVerticle;
@@ -59,7 +58,7 @@ public class ElasticSearchVerticle extends AbstractVerticle {
 
                         @Override
                         public void onResponse(final MultiSearchResponse result) {
-                            handleKitsSearchResponse(kitRequest.getId(), kitRequest.getGender(), kitRequest.getPhone(), result);
+                            handleKitsSearchResponse(kitRequest.getId(), kitRequest.getPhone(), result);
                         }
 
                         @Override
@@ -73,16 +72,19 @@ public class ElasticSearchVerticle extends AbstractVerticle {
         }
     }
 
-    private void handleKitsSearchResponse(final Long kitId, final Gender gender, final String phone, final MultiSearchResponse result) {
+    private void handleKitsSearchResponse(final String kitId, final String phone, final MultiSearchResponse result) {
 
         try {
             DeliveryOptions options = new DeliveryOptions();
             options.addHeader(PHONE, phone);
 
-            KitResponse kitResponse = ElasticSearchKitResponseBuilder.build(kitId, gender, result);
+            KitResponse kitResponse = ElasticSearchKitResponseBuilder.build(kitId, result);
             logger.info("Number of kits found: {}", kitResponse.getRecommendations().size());
 
-            vertx.eventBus().send(FinderEvent.ES_QUERY_DONE_EVENT.name(), objectMapper.writeValueAsString(kitResponse), options);
+            String kitResponseJson = objectMapper.writeValueAsString(kitResponse);
+            logger.info("Kits: {}", kitResponseJson);
+
+            vertx.eventBus().send(FinderEvent.ES_QUERY_DONE_EVENT.name(), kitResponseJson, options);
 
         } catch (JsonProcessingException e) {
             logger.error("Error sending message by event bus.", e);

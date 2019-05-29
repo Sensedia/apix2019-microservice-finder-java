@@ -14,7 +14,7 @@ public class Item implements Serializable {
     private String color;
     private String link;
     private String image;
-    private String date;
+    private Long date;
 
     public Item() {
     }
@@ -43,7 +43,7 @@ public class Item implements Serializable {
         this.image = image;
     }
 
-    public void setDate(String date) {
+    public void setDate(Long date) {
         this.date = date;
     }
 
@@ -71,7 +71,7 @@ public class Item implements Serializable {
         return image;
     }
 
-    public String getDate() {
+    public Long getDate() {
         return date;
     }
 }

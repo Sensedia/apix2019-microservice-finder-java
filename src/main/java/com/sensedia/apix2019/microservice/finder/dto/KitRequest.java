@@ -7,14 +7,14 @@ import java.util.List;
 
 public class KitRequest implements Serializable {
 
-    private Long id;
+    private String id;
     private String phone;
     private Gender gender;
     private List<Specification> specifications;
 
     public KitRequest() { }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -30,7 +30,7 @@ public class KitRequest implements Serializable {
         this.specifications = specifications;
     }
 
-    public Long getId() { return id; }
+    public String getId() { return id; }
 
     public String getPhone() {
         return phone;

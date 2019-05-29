@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sensedia.apix2019.microservice.finder.builder.Builder;
 import com.sensedia.apix2019.microservice.finder.dto.Item;
 import com.sensedia.apix2019.microservice.finder.dto.KitResponse;
-import com.sensedia.apix2019.microservice.finder.enumeration.Gender;
 import com.sensedia.apix2019.microservice.finder.enumeration.Type;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -27,10 +26,10 @@ public final class ElasticSearchKitResponseBuilder {
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchKitResponseBuilder.class);
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static KitResponse build(final Long id, final Gender gender, final MultiSearchResponse result) {
+    public static KitResponse build(final String id, final MultiSearchResponse result) {
 
         Map<Type, List<Item>> items = extractItemsByType(result);
-        return build(id, gender, items);
+        return build(id, items);
     }
 
     private static Map<Type, List<Item>> extractItemsByType(final MultiSearchResponse result) {
@@ -58,25 +57,28 @@ public final class ElasticSearchKitResponseBuilder {
 
         final List<Item> items = new ArrayList<>();
 
-        for (int i = 0; i < result.getResponse().getHits().getHits().length; i++) {
+        if (result != null && result.getResponse() != null && result.getResponse().getHits() != null) {
 
-            try {
-                String sourceAsString = result.getResponse().getHits().getHits()[i].getSourceAsString();
-                items.add(objectMapper.readValue(sourceAsString, Item.class));
+            for (int i = 0; i < result.getResponse().getHits().getHits().length; i++) {
 
-            } catch (IOException e) {
-                logger.error("Error converting elastic search source response. ", e);
+                try {
+                    String sourceAsString = result.getResponse().getHits().getHits()[i].getSourceAsString();
+                    items.add(objectMapper.readValue(sourceAsString, Item.class));
+
+                } catch (IOException e) {
+                    logger.error("Error converting elastic search source response. ", e);
+                }
             }
-        }
 
-        if (!items.isEmpty()) {
-            return Optional.of(new ImmutablePair<>(items.get(1).getType(), items));
+            if (!items.isEmpty()) {
+                return Optional.of(new ImmutablePair<>(items.get(1).getType(), items));
+            }
         }
 
         return Optional.empty();
     }
 
-    private static KitResponse build(final Long id, final Gender gender, final Map<Type, List<Item>> itemsByType) {
+    private static KitResponse build(final String id, final Map<Type, List<Item>> itemsByType) {
 
         final IntStream kitsRange = IntStream.range(0, retrieveNumberOfKitsFound(itemsByType));
 
@@ -85,7 +87,6 @@ public final class ElasticSearchKitResponseBuilder {
 
         return Builder.of(KitResponse::new)
                 .with(KitResponse::setId, id)
-                .with(KitResponse::setGender, gender)
                 .with(KitResponse::setRecommendations, recommendations)
                 .build();
     }
