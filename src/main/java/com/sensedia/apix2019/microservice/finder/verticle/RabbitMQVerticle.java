@@ -93,8 +93,8 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
     private void publishKitResponse(final Message<String> message) {
 
-        publishMsgToNotificationService(message);
         publishToKitsService(message);
+        publishMsgToNotificationService(message);
     }
 
     private void publishMsgToNotificationService(final Message<String> message) {
@@ -102,7 +102,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
         JsonObject notificationJsonObj = new JsonObject().put(PHONE, message.headers().get(PHONE))
                 .put(NUMBER_OF_COMBINATIONS_FOUND, message.headers().get(NUMBER_OF_COMBINATIONS_FOUND));
 
-        JsonObject notificationPayload = new JsonObject().put(BODY, notificationJsonObj);
+        JsonObject notificationPayload = new JsonObject().put(BODY, notificationJsonObj.toString());
         client.basicPublish("", queueNotificationName, notificationPayload, publishHandler(queueNotificationName));
     }
 
