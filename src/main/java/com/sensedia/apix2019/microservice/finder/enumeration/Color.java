@@ -2,5 +2,5 @@ package com.sensedia.apix2019.microservice.finder.enumeration;
 
 public enum Color {
 
-    WHITE, BLACK, BLUE
+    BLACK, BLUE, BROWN, GREEN, GREY, ORANGE, PINK, PURPLE, RED, WHITE, YELLOW
 }
