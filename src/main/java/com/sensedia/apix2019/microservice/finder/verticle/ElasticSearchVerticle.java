@@ -30,6 +30,7 @@ public class ElasticSearchVerticle extends AbstractVerticle {
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchVerticle.class);
 
     private static final String PHONE = "phone";
+    private static final String NUMBER_OF_COMBINATIONS_FOUND = "numberOfCombinationsFound";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -75,14 +76,15 @@ public class ElasticSearchVerticle extends AbstractVerticle {
     private void handleKitsSearchResponse(final String kitId, final String phone, final MultiSearchResponse result) {
 
         try {
-            DeliveryOptions options = new DeliveryOptions();
-            options.addHeader(PHONE, phone);
-
             KitResponse kitResponse = ElasticSearchKitResponseBuilder.build(kitId, result);
             logger.info("Number of kits found: {}", kitResponse.getRecommendations().size());
 
             String kitResponseJson = objectMapper.writeValueAsString(kitResponse);
             logger.info("Kits: {}", kitResponseJson);
+
+            DeliveryOptions options = new DeliveryOptions();
+            options.addHeader(PHONE, phone);
+            options.addHeader(NUMBER_OF_COMBINATIONS_FOUND, String.valueOf(kitResponse.getRecommendations().size()));
 
             vertx.eventBus().send(FinderEvent.ES_QUERY_DONE_EVENT.name(), kitResponseJson, options);
 

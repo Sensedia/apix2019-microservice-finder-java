@@ -23,6 +23,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
     private static final String BODY = "body";
     private static final String PHONE = "phone";
+    private static final String NUMBER_OF_COMBINATIONS_FOUND = "numberOfCombinationsFound";
 
     private JsonObject config;
     private RabbitMQClient client;
@@ -86,19 +87,33 @@ public class RabbitMQVerticle extends AbstractVerticle {
     }
 
     private void consumeElasticSearchQueryDone() {
-        vertx.eventBus()
-                .consumer(FinderEvent.ES_QUERY_DONE_EVENT.name(), this::publishKitResponse);
+
+        vertx.eventBus().consumer(FinderEvent.ES_QUERY_DONE_EVENT.name(), this::publishKitResponse);
     }
 
-    private void publishKitResponse(Message<String> message) {
-        JsonObject notificationPayload = new JsonObject().put("body", message.headers().get(PHONE));
-        JsonObject recommendationsPayload = new JsonObject().put("body", message.body());
+    private void publishKitResponse(final Message<String> message) {
 
-        client.basicPublish("", queueNotificationName, notificationPayload, this.publishHandler(queueNotificationName));
-        client.basicPublish("", queueRecommendationName, recommendationsPayload, this.publishHandler(queueRecommendationName));
+        publishMsgToNotificationService(message);
+        publishToKitsService(message);
     }
 
-    private Handler<AsyncResult<Void>> publishHandler(String queueName) {
+    private void publishMsgToNotificationService(final Message<String> message) {
+
+        JsonObject notificationJsonObj = new JsonObject().put(PHONE, message.headers().get(PHONE))
+                .put(NUMBER_OF_COMBINATIONS_FOUND, message.headers().get(NUMBER_OF_COMBINATIONS_FOUND));
+
+        JsonObject notificationPayload = new JsonObject().put(BODY, notificationJsonObj);
+        client.basicPublish("", queueNotificationName, notificationPayload, publishHandler(queueNotificationName));
+    }
+
+    private void publishToKitsService(final Message<String> message) {
+
+        JsonObject recommendationsPayload = new JsonObject().put(BODY, message.body());
+        client.basicPublish("", queueRecommendationName, recommendationsPayload, publishHandler(queueRecommendationName));
+    }
+
+    private Handler<AsyncResult<Void>> publishHandler(final String queueName) {
+
         return (AsyncResult<Void> pubResult) -> {
             if (pubResult.succeeded()) {
                 logger.info("Message on '{}' queue published!", queueName);
