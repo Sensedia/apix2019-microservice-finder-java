@@ -26,6 +26,7 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 
 2 - Crie um remote debug pela IDE, apontando para a porta 8005.
 
+![criando_remote_debug](https://user-images.githubusercontent.com/38056234/58743250-62924700-8404-11e9-8a3f-8c612060d6b0.png)
 
 
 ##### Para acessar o console de administração do RabbitMQ:
