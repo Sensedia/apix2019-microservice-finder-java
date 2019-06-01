@@ -55,6 +55,7 @@ Opção 2 - Para testar o microserviço isoladamente, verificando somente a part
    ]
 }
 ```
+Quando o crawler concluir a busca, uma mensagem será enviada para a fila 'apix-specification-queue' e na sequência será consumida por este microserviço.
 
 ##### Para acessar o console de administração do RabbitMQ:
 http://[docker host IP]:15672/#/
