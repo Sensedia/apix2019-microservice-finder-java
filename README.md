@@ -14,17 +14,17 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 
   - Edite a propriedade elastic_search.hostname apontando o ip do container elasticsearch_apix2019;
 
-  - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019;
+  - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019.
 
-*Para descobrir o ip do container, execute o seguinte comando: docker inspect <container_name>. Valor: IPAddress;
+*Para descobrir o ip do container, execute o seguinte comando: docker inspect <container_name>. Valor: IPAddress.
   
 2 - Execute o script run.sh.
 
 ### Como fazer debug da aplicação:
 
-1 - Execute a aplicação localmente seguindo os passos das instrução anterior.
+1 - Execute a aplicação localmente seguindo os passos das instrução anterior;
 
-2 - Crie um remote debug pela IDE, apontando para a porta 8005.
+2 - Crie um remote debug pela IDE, apontando para a porta 8005. Siga o exemplo da imagem abaixo:
 
 ![criando_remote_debug](https://user-images.githubusercontent.com/38056234/58743250-62924700-8404-11e9-8a3f-8c612060d6b0.png)
 
