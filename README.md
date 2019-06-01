@@ -10,13 +10,13 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 
 ### Como executar localmente:
 
-1 - Localize o arquivo application-conf.json;
+1 - Localize o arquivo 'application-conf.json';
 
   - Altere o valor da propriedade elastic_search.hostname para `localhost`;
 
   - Altere o valor da propriedade rabbit.connectionUrl para `amqp://localhost`;
 
-2 - Execute o script run.sh.
+2 - Execute o script 'run.sh'.
 
 ### Como fazer debug da aplicação:
 
