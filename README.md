@@ -28,6 +28,34 @@ OBS: Caso tenha feito alguma alteração de código e queira vê-la refletida na
 
 OBS: Para alterar a porta de 8005 para qualquer outra, edite o arquivo 'run.sh'.
 
+### Como testar se o microserviço está montando as recomendações de acordo com os dados vindos do Elastic Search:
+
+Opção 1 - Para testar o fluxo completo, acesse o README do microserviço de kit e inicie criando um kit, fazendo o post descrito lá. Neste caso, o crawler também precisa estar executando.
+
+Opção 2 - Para testar o microserviço isoladamente, verificando somente a parte da montagem dos kits, é necessário que o Elastic Search possua dados. Ou seja, o crawler precisa ter alimentado esses dados antes. Então, para garantir, inicie este teste partindo do fluxo do crawler. Então, você pode postar uma mensagem diretamente no rabbit, na fila 'apix-kit-queue' com o seguinte payload:
+
+```
+{
+   "id":5f3671ae-c0da-454b-9da3-7d22bbc068cb,
+   "phone":"+5519999999999",
+   "gender":"F",
+   "specifications":[
+      { 
+         "type":"PANT",
+         "color":"BLUE"
+      },
+      {
+         "type":"SHIRT",
+         "color":"WHITE"
+      },
+      {
+         "type":"SHOES",
+         "color":"BLACK"
+      }
+   ]
+}
+```
+
 ##### Para acessar o console de administração do RabbitMQ:
 http://[docker host IP]:15672/#/
 
