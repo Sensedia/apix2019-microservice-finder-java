@@ -6,7 +6,7 @@
 
 2 - Execute o script 'docker-start.sh' para iniciar o container da aplicação;
 
-OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem docker usando o comando 'generate-image.sh' e depois use o comando 'update-finder.sh', na pasta 'docker', para subir um novo container do docker. 
+OBS: Caso tenha feito alguma alteração de código e queira vê-lo código refletido na aplicação, repita os dois passos anteriores. 
 
 ### Como executar localmente:
 
