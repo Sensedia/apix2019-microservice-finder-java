@@ -97,6 +97,12 @@ public class RabbitMQVerticle extends AbstractVerticle {
         publishMsgToNotificationService(message);
     }
 
+    private void publishToKitsService(final Message<String> message) {
+
+        JsonObject recommendationsPayload = new JsonObject().put(BODY, message.body());
+        client.basicPublish("", queueRecommendationName, recommendationsPayload, publishHandler(queueRecommendationName));
+    }
+
     private void publishMsgToNotificationService(final Message<String> message) {
 
         JsonObject notificationJsonObj = new JsonObject().put(PHONE, message.headers().get(PHONE))
@@ -104,12 +110,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         JsonObject notificationPayload = new JsonObject().put(BODY, notificationJsonObj.toString());
         client.basicPublish("", queueNotificationName, notificationPayload, publishHandler(queueNotificationName));
-    }
-
-    private void publishToKitsService(final Message<String> message) {
-
-        JsonObject recommendationsPayload = new JsonObject().put(BODY, message.body());
-        client.basicPublish("", queueRecommendationName, recommendationsPayload, publishHandler(queueRecommendationName));
     }
 
     private Handler<AsyncResult<Void>> publishHandler(final String queueName) {
