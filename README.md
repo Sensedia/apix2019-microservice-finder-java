@@ -1,6 +1,6 @@
 # apix2019-microservice-finder-java :rocket:
 
-### Como usar com docker:
+### Como executar via docker:
 
 1 - Execute o script 'generate-image.sh', presente na pasta raiz do projeto, para gerar a imagem docker da aplicação;
 
@@ -8,7 +8,7 @@
 
 OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem docker usando o comando 'generate-image.sh' e depois use o comando 'update-finder.sh', na pasta 'docker', para subir um novo container do docker. 
 
-### Como usar localmente:
+### Como executar localmente:
 
 1 - Localize o arquivo application-conf.json;
 
@@ -20,7 +20,7 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
   
 2 - Execute o script run.sh.
 
-### Como realizar debug da aplicação:
+### Como fazer debug da aplicação:
 
 1 - Execute a aplicação localmente seguindo os passos das instrução anterior.
 
