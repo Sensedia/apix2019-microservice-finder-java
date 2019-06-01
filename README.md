@@ -24,7 +24,7 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 
 1 - Execute a aplicação localmente seguindo os passos das instrução anterior;
 
-2 - Crie um remote debug pela IDE, apontando para a porta 8005. Siga o exemplo da imagem abaixo:
+2 - Crie um remote debug pelo IntelliJ, apontando para a porta 8005. Siga o exemplo da imagem abaixo:
 
 ![criando_remote_debug](https://user-images.githubusercontent.com/38056234/58743250-62924700-8404-11e9-8a3f-8c612060d6b0.png)
 
