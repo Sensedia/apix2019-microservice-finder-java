@@ -10,9 +10,9 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 ### Como usar localmente:
 
 1 - Localize o arquivo application-conf.json;
-  1.1 - Edite a propriedade elastic_search.hostname apontando o ip do container elasticsearch_apix2019;
-  1.2 - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019;
-  Para saber qual é o ip do container, execute no terminal: docker inspect <container_name>. Valor: IPAddress. 
+1.1 - Edite a propriedade elastic_search.hostname apontando o ip do container elasticsearch_apix2019;
+1.2 - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019;
+Para saber qual é o ip do container, execute no terminal: docker inspect <container_name>. Valor: IPAddress;
 2 - Execute o script run.sh.
 
 ### Como realizar debug da aplicação:
