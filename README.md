@@ -32,7 +32,7 @@ OBS: Para alterar a porta de 8005 para qualquer outra, edite o arquivo 'run.sh'.
 
 Opção 1 - Para testar o fluxo completo, acesse o README do microserviço de kit e inicie criando um kit, fazendo o post descrito lá. Neste caso, o crawler também precisa estar executando.
 
-Opção 2 - Para testar o microserviço isoladamente, verificando somente a parte da montagem dos kits, é necessário que o Elastic Search possua dados. Ou seja, o crawler precisa ter alimentado esses dados antes. Então, para garantir, inicie este teste partindo do fluxo do crawler. Então, você pode postar uma mensagem diretamente no rabbit, na fila 'apix-kit-queue' com o seguinte payload:
+Opção 2 - Para testar o microserviço sem ter que passar pelo fluxo todo, verificando somente a parte da montagem dos kits, é necessário que o Elastic Search possua dados. Ou seja, o crawler precisa ter alimentado esses dados antes. Então, para garantir, inicie este teste partindo do fluxo do crawler. Então, você pode postar uma mensagem diretamente no rabbit, na fila 'apix-kit-queue' com o seguinte payload:
 
 ```
 {
