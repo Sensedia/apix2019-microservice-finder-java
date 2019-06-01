@@ -14,7 +14,7 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 
   - Edite a propriedade elastic_search.hostname apontando o ip do container elasticsearch_apix2019;
 
-  - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019.
+  - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019;
 
 *Para descobrir o ip do container, execute o seguinte comando: docker inspect <container_name>. Valor: IPAddress.
   
