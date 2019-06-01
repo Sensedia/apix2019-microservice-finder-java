@@ -1,24 +1,27 @@
 # apix2019-microservice-finder-java
 
-Versão em vertx do microserviço de finder para o APIX2019
+### Como usar com docker:
 
-Como usar localmente:
+1 - Execute o script 'generate-image.sh', presente na pasta raiz do projeto, para gerar a imagem docker da aplicação;
+2 - Execute o comando 'docker-start.sh' para iniciar o container da aplicação;
 
-1- Acesse a pasta 'src/main/application-conf.json' e altere o valor do domínio do 'connectionUrl' para 'localhost'
+OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem docker usando o comando 'generate-image.sh' e depois use o comando 'update-finder.sh', na pasta 'docker', para subir um novo container do docker. 
 
-1- Gere o jar do projeto usando o comando 'mvn clean install';
+### Como usar localmente:
 
-2- Execute o comando 'run.sh' para iniciar a aplicação;
+1 - Localize o arquivo application-conf.json;
+  1.1 - Edite a propriedade elastic_search.hostname apontando o ip do container elasticsearch_apix2019;
+  1.2 - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019;
+  Para saber qual é o ip do container, execute no terminal: docker inspect <container_name>. Valor: IPAddress. 
+2 - Execute o script run.sh.
 
-Usar com instância docker:
+### Como realizar debug da aplicação:
 
-1- Execute o comando 'sh generate-image.sh' para gerar a imagem docker do projeto
+1 - Execute a aplicação localmente seguindo os passos das instrução anterior.
+2 - Crie um remote debug pela IDE, apontando para a porta 8005.
 
-2- Acesse a pasta 'docker' e execute o comando 'sh docker-start.sh' para iniciar o container;
 
-OBS: Lembre-se de subir uma instância de RabbitMQ via docker e coloca-lá no network 'apix2019'. 
 
-OBS1: Caso esteja usando o finder em docker, certifique-se de que o valor do domínio no atributo 'connectionUrl' do arquivo 'src/main/application-conf.json'está apontando para o docker do rabbitmq, e não para 'localhost';
-
-OBS2: Caso a fila no RabbitMQ não exista, a aplicação criará automaticamente.
+##### Para acessar o console de administração do RabbitMQ:
+http://[docker host IP]:15672/#/
 
