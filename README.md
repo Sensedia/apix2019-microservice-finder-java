@@ -26,7 +26,7 @@ OBS: Caso tenha feito alguma alteração de código e queira vê-lo código refl
 
 ![criando_remote_debug](https://user-images.githubusercontent.com/38056234/58743250-62924700-8404-11e9-8a3f-8c612060d6b0.png)
 
-OBS: Para alterar a porta de 8005 para qualquer outra, edite o arquivo run.sh.
+OBS: Para alterar a porta de 8005 para qualquer outra, edite o arquivo 'run.sh'.
 
 ##### Para acessar o console de administração do RabbitMQ:
 http://[docker host IP]:15672/#/
