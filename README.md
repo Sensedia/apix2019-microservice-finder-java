@@ -16,7 +16,7 @@ OBS: Caso tenha feito alguma alteração de código, gere novamente a imagem doc
 
   - 1.2 - Edite a propriedade rabbit.connectionUrl substituindo o valor "rabbitmq" pelo ip do container rabbitmq_apix2019;
 
-  - 1.3 - Para descobrir o ip do container, execute o seguinte comando: docker inspect <container_name>. Valor: IPAddress;
+*Para descobrir o ip do container, execute o seguinte comando: docker inspect <container_name>. Valor: IPAddress;
   
 2 - Execute o script run.sh.
 
