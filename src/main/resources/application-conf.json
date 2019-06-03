@@ -7,7 +7,6 @@
   "rabbit": {
     "queueSpecificationName": "apix-specification-queue",
     "queueRecommendationName": "apix-recommendation-queue",
-    "queueNotificationName": "apix-notification-queue",
     "connectionUrl": "amqp://rabbitmq"
   }
 }

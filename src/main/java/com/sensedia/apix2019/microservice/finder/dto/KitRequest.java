@@ -8,7 +8,6 @@ import java.util.List;
 public class KitRequest implements Serializable {
 
     private String id;
-    private String phone;
     private Gender gender;
     private List<Specification> specifications;
 
@@ -16,10 +15,6 @@ public class KitRequest implements Serializable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public void setGender(Gender gender) {
@@ -31,11 +26,6 @@ public class KitRequest implements Serializable {
     }
 
     public String getId() { return id; }
-
-    public String getPhone() {
-        return phone;
-    }
-
 
     public Gender getGender() {
         return gender;

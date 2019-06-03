@@ -22,14 +22,11 @@ public class RabbitMQVerticle extends AbstractVerticle {
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQVerticle.class);
 
     private static final String BODY = "body";
-    private static final String PHONE = "phone";
-    private static final String NUMBER_OF_COMBINATIONS_FOUND = "numberOfCombinationsFound";
 
     private JsonObject config;
     private RabbitMQClient client;
     private String queueSpecificationName;
     private String queueRecommendationName;
-    private String queueNotificationName;
 
     @Override
     public void init(Vertx vertx, Context ctx) {
@@ -41,7 +38,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         queueSpecificationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_SPECIFICATION_NAME_ATTR);
         queueRecommendationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_RECOMMENDATION_NAME_ATTR);
-        queueNotificationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_NOTIFICATION_NAME_ATTR);
     }
 
     @Override
@@ -94,22 +90,12 @@ public class RabbitMQVerticle extends AbstractVerticle {
     private void publishKitResponse(final Message<String> message) {
 
         publishToKitsService(message);
-        publishMsgToNotificationService(message);
     }
 
     private void publishToKitsService(final Message<String> message) {
 
         JsonObject recommendationsPayload = new JsonObject().put(BODY, message.body());
         client.basicPublish("", queueRecommendationName, recommendationsPayload, publishHandler(queueRecommendationName));
-    }
-
-    private void publishMsgToNotificationService(final Message<String> message) {
-
-        JsonObject notificationJsonObj = new JsonObject().put(PHONE, message.headers().get(PHONE))
-                .put(NUMBER_OF_COMBINATIONS_FOUND, message.headers().get(NUMBER_OF_COMBINATIONS_FOUND));
-
-        JsonObject notificationPayload = new JsonObject().put(BODY, notificationJsonObj.toString());
-        client.basicPublish("", queueNotificationName, notificationPayload, publishHandler(queueNotificationName));
     }
 
     private Handler<AsyncResult<Void>> publishHandler(final String queueName) {
