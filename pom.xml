@@ -12,7 +12,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
-            <version>3.6.2</version>
+            <version>3.7.1</version>
 
             <exclusions>
                 <exclusion>
@@ -25,13 +25,13 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-config</artifactId>
-            <version>3.6.2</version>
+            <version>3.7.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>5.4.2</version>
+            <version>5.7.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-rabbitmq-client</artifactId>
-            <version>3.7.0</version>
+            <version>3.7.1</version>
         </dependency>
 
         <dependency>

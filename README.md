@@ -36,8 +36,7 @@ Opção 2 - Para testar o microserviço sem ter que passar pelo fluxo todo é ne
 
 ```
 {
-   "id":5f3671ae-c0da-454b-9da3-7d22bbc068cb,
-   "phone":"+5519999999999",
+   "id":"5f3671ae-c0da-454b-9da3-7d22bbc068cb",
    "gender":"F",
    "specifications":[
       { 

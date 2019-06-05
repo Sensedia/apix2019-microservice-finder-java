@@ -14,22 +14,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rabbitmq.RabbitMQClient;
-
-import java.util.Objects;
+import io.vertx.rabbitmq.RabbitMQConsumer;
 
 public class RabbitMQVerticle extends AbstractVerticle {
 
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQVerticle.class);
 
     private static final String BODY = "body";
-    private static final String PHONE = "phone";
-    private static final String NUMBER_OF_COMBINATIONS_FOUND = "numberOfCombinationsFound";
 
     private JsonObject config;
     private RabbitMQClient client;
     private String queueSpecificationName;
     private String queueRecommendationName;
-    private String queueNotificationName;
 
     @Override
     public void init(Vertx vertx, Context ctx) {
@@ -41,7 +37,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         queueSpecificationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_SPECIFICATION_NAME_ATTR);
         queueRecommendationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_RECOMMENDATION_NAME_ATTR);
-        queueNotificationName = config.getString(ConfigConstants.RABBITMQ_QUEUE_NOTIFICATION_NAME_ATTR);
     }
 
     @Override
@@ -63,26 +58,20 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         final EventBus eventBus = vertx.eventBus();
 
-        vertx.setPeriodic(1000, handler -> {
+        client.basicConsumer(queueSpecificationName, rabbitConsumerResultAsync -> {
 
-            client.basicGet(queueSpecificationName, true, getResult -> {
+            RabbitMQConsumer consumerResult = rabbitConsumerResultAsync.result();
 
-                if (getResult.succeeded()) {
-                    JsonObject msg = getResult.result();
+            if (rabbitConsumerResultAsync.succeeded()) {
+                consumerResult.handler(message -> {
+                    String msgPayload = message.body().toString();
+                    logger.info("Received message {} .", msgPayload);
 
-                    if (Objects.nonNull(msg)) {
-                        String msgPayload = msg.getString(BODY);
-
-                        logger.info("Received message: {}", msgPayload);
-
-                        eventBus.send(FinderEvent.ES_SEARCH_EVENT.name(), msgPayload);
-                    }
-
-                } else {
-                    logger.error("Error during connection. Cause {}", getResult.cause().getCause().getMessage());
-                    logger.error("Trying to recreate queue {}", queueSpecificationName);
-                }
-            });
+                    eventBus.send(FinderEvent.ES_SEARCH_EVENT.name(), msgPayload);
+                });
+            } else {
+                logger.error("Error consuming message {}. ", rabbitConsumerResultAsync.cause());
+            }
         });
     }
 
@@ -94,7 +83,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
     private void publishKitResponse(final Message<String> message) {
 
         publishToKitsService(message);
-        publishMsgToNotificationService(message);
     }
 
     private void publishToKitsService(final Message<String> message) {
@@ -103,23 +91,26 @@ public class RabbitMQVerticle extends AbstractVerticle {
         client.basicPublish("", queueRecommendationName, recommendationsPayload, publishHandler(queueRecommendationName));
     }
 
-    private void publishMsgToNotificationService(final Message<String> message) {
-
-        JsonObject notificationJsonObj = new JsonObject().put(PHONE, message.headers().get(PHONE))
-                .put(NUMBER_OF_COMBINATIONS_FOUND, message.headers().get(NUMBER_OF_COMBINATIONS_FOUND));
-
-        JsonObject notificationPayload = new JsonObject().put(BODY, notificationJsonObj.toString());
-        client.basicPublish("", queueNotificationName, notificationPayload, publishHandler(queueNotificationName));
-    }
-
     private Handler<AsyncResult<Void>> publishHandler(final String queueName) {
 
         return (AsyncResult<Void> pubResult) -> {
             if (pubResult.succeeded()) {
-                logger.info("Message on '{}' queue published!", queueName);
+                logger.info("Message published to queue '{}' published!", queueName);
             } else {
                 logger.error("Error during message publish on queue '{}'. Cause {}", queueName, pubResult.cause());
             }
         };
+    }
+
+    @Override
+    public void stop() {
+
+        client.stop(stopHandler -> {
+            if (stopHandler.succeeded()) {
+                logger.info("Rabbit client was stopped!");
+            } else {
+                logger.error("Something wrong stopping Rabbitmq client {}", stopHandler.cause());
+            }
+        });
     }
 }

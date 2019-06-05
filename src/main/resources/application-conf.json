@@ -1,13 +1,12 @@
 {
   "elastic_search": {
-    "hostname": "elasticsearch",
+    "hostname": "elasticsearch_apix2019",
     "scheme": "http",
     "port": 9200
   },
   "rabbit": {
     "queueSpecificationName": "apix-specification-queue",
     "queueRecommendationName": "apix-recommendation-queue",
-    "queueNotificationName": "apix-notification-queue",
     "connectionUrl": "amqp://rabbitmq"
   }
 }
