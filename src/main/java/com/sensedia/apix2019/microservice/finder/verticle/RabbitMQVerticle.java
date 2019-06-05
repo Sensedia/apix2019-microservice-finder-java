@@ -14,8 +14,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rabbitmq.RabbitMQClient;
-
-import java.util.Objects;
+import io.vertx.rabbitmq.RabbitMQConsumer;
 
 public class RabbitMQVerticle extends AbstractVerticle {
 
@@ -59,26 +58,20 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         final EventBus eventBus = vertx.eventBus();
 
-        vertx.setPeriodic(1000, handler -> {
+        client.basicConsumer(queueSpecificationName, rabbitConsumerResultAsync -> {
 
-            client.basicGet(queueSpecificationName, true, getResult -> {
+            RabbitMQConsumer consumerResult = rabbitConsumerResultAsync.result();
 
-                if (getResult.succeeded()) {
-                    JsonObject msg = getResult.result();
+            if (rabbitConsumerResultAsync.succeeded()) {
+                consumerResult.handler(message -> {
+                    String msgPayload = message.body().toString();
+                    logger.info("Received message {} .", msgPayload);
 
-                    if (Objects.nonNull(msg)) {
-                        String msgPayload = msg.getString(BODY);
-
-                        logger.info("Received message: {}", msgPayload);
-
-                        eventBus.send(FinderEvent.ES_SEARCH_EVENT.name(), msgPayload);
-                    }
-
-                } else {
-                    logger.error("Error during connection. Cause {}", getResult.cause().getCause().getMessage());
-                    logger.error("Trying to recreate queue {}", queueSpecificationName);
-                }
-            });
+                    eventBus.send(FinderEvent.ES_SEARCH_EVENT.name(), msgPayload);
+                });
+            } else {
+                logger.error("Error consuming message {}. ", rabbitConsumerResultAsync.cause());
+            }
         });
     }
 
@@ -102,10 +95,22 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         return (AsyncResult<Void> pubResult) -> {
             if (pubResult.succeeded()) {
-                logger.info("Message on '{}' queue published!", queueName);
+                logger.info("Message published to queue '{}' published!", queueName);
             } else {
                 logger.error("Error during message publish on queue '{}'. Cause {}", queueName, pubResult.cause());
             }
         };
+    }
+
+    @Override
+    public void stop() {
+
+        client.stop(stopHandler -> {
+            if (stopHandler.succeeded()) {
+                logger.info("Rabbit client was stopped!");
+            } else {
+                logger.error("Something wrong stopping Rabbitmq client {}", stopHandler.cause());
+            }
+        });
     }
 }

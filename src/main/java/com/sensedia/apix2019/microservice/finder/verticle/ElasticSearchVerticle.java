@@ -84,4 +84,10 @@ public class ElasticSearchVerticle extends AbstractVerticle {
             logger.error("Error sending message by event bus.", e);
         }
     }
+
+    @Override
+    public void stop() throws Exception {
+
+        client.close();
+    }
 }
